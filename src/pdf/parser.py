@@ -1,7 +1,7 @@
 import sys, os
 from pdfrw import PdfReader
 from reportlab.pdfgen import canvas
-from reportlab.lib.colors import black
+from reportlab.lib.colors import black, red, green, blue
 from pdfminer.high_level import extract_pages
 from pdfminer.layout import LAParams, LTLine, LTRect, LTTextContainer
 from models.TextLine import TextLine
@@ -16,8 +16,9 @@ canvas = canvas.Canvas(debugFile)
 form = canvas.acroForm
 canvas.setStrokeColor(black)
 canvas.setLineWidth(0.1)
+colors = [ black, red, green, blue ]
 
-for page_layout in extract_pages(pdf_file = pdfFile, laparams = LAParams(line_margin=0)):
+for page_layout in extract_pages(pdf_file = pdfFile, laparams = LAParams(line_margin=0, char_margin=0.5)):
     pageNum = page_layout.pageid
     pageWidth = page_layout.bbox[2]
     pageHeight = page_layout.bbox[3]
@@ -58,8 +59,11 @@ for page_layout in extract_pages(pdf_file = pdfFile, laparams = LAParams(line_ma
         form.textfield(value=textLine.Text, x=left, y=bottom, width=right-left, height=top-bottom, borderWidth=0, fontSize=7)
     
     # dump lines
+    ci = 0
     for line in lines:
+        canvas.setStrokeColor(colors[ci])
+        ci = (ci + 1) % len(colors)
         canvas.setLineWidth(line.LineWidth)
-        canvas.line(line.Position.Left, line.Position.Bottom, line.Position.Right, line.Position.Top)
+        canvas.rect(line.Position.Left, line.Position.Bottom, line.Position.Right - line.Position.Left, line.Position.Top - line.Position.Bottom)
     canvas.showPage()         
 canvas.save()

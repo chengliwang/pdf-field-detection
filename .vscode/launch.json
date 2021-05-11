@@ -9,7 +9,7 @@
             "type": "python",
             "request": "launch",
             "program": "${file}",
-            "args": [ "c:\\PDF\\Training\\T1\\2020\\E_AB428.pdf" ],
+            "args": [ "c:\\PDF\\Temp\\t2042-20e.pdf" ],
             "console": "integratedTerminal"
         }
     ]
