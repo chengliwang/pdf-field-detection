@@ -1,7 +1,7 @@
 import sys, os
 from pdfrw import PdfReader
 from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
+from reportlab.lib.colors import black
 from pdfminer.high_level import extract_pages
 from pdfminer.layout import LAParams, LTLine, LTRect, LTTextContainer
 from models.TextLine import TextLine
@@ -12,13 +12,16 @@ outFile = os.path.splitext(pdfFile)[0] + "-out.pdf"
 debugFile = os.path.splitext(pdfFile)[0] + "-debug.pdf"
 
 reader = PdfReader(pdfFile)
-writer = canvas.Canvas(debugFile, pagesize=letter)
-form = writer.acroForm
+canvas = canvas.Canvas(debugFile)
+form = canvas.acroForm
+canvas.setStrokeColor(black)
+canvas.setLineWidth(0.1)
 
 for page_layout in extract_pages(pdf_file = pdfFile, laparams = LAParams(line_margin=0)):
     pageNum = page_layout.pageid
     pageWidth = page_layout.bbox[2]
     pageHeight = page_layout.bbox[3]
+    canvas.setPageSize((pageWidth, pageHeight))
 
     # extract texts and lines
     textLines = []
@@ -30,6 +33,7 @@ for page_layout in extract_pages(pdf_file = pdfFile, laparams = LAParams(line_ma
             lines.extend(find_lines(element))
         if isinstance(element, LTLine):
             lines.extend(find_lines(element))
+
     # dump debug file
 
     # pdf_page = reader.pages[pageNum - 1]  
@@ -45,11 +49,17 @@ for page_layout in extract_pages(pdf_file = pdfFile, laparams = LAParams(line_ma
     #             bottom = float(position[1])
     #             form.textfield(name=key, x=left, y=bottom, width=right-left, height=top-bottom, borderWidth=0, tooltip=key, fontSize=7)
 
+    # dump text lines
     for textLine in textLines:
         left = textLine.Position.Left
         right = textLine.Position.Right
         top = textLine.Position.Top
         bottom = textLine.Position.Bottom
         form.textfield(value=textLine.Text, x=left, y=bottom, width=right-left, height=top-bottom, borderWidth=0, fontSize=7)
-    writer.showPage()         
-writer.save()
+    
+    # dump lines
+    for line in lines:
+        canvas.setLineWidth(line.LineWidth)
+        canvas.line(line.Position.Left, line.Position.Bottom, line.Position.Right, line.Position.Top)
+    canvas.showPage()         
+canvas.save()

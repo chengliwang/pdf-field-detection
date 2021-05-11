@@ -5,7 +5,7 @@ class Box:
         self.IsHorizontal = False
         self.LeftPadding = 0
         self.RightPadding = 0
-        self.Weight = 0
+        self.LineWidth = 0
         self.TopElement = None
         self.LineText = None
         self.Prefix = None

@@ -21,9 +21,11 @@ def get_acro_key(annotation):
 def get_position(bbox):
     return Position(bbox[0], bbox[2], bbox[3], bbox[1])
 
-def convert_position(position, isHorizontal, type):
+def convert_position(element, isHorizontal, type):
+    position = get_position(element.bbox)
     box = Box(position)
     box.IsHorizontal = isHorizontal
+    box.LineWidth = element.linewidth
     if isHorizontal:
         if type == BorderType.Top:
             position.Bottom = position.Top
@@ -42,10 +44,11 @@ def find_lines(element):
     if pos.Top - pos.Bottom < _lineDelta or pos.Right - pos.Left < _lineDelta:
         box = Box(pos)
         box.IsHorizontal = abs(pos.Top - pos.Bottom) < _lineDelta and abs(pos.Right - pos.Left) > _lineDelta
+        box.LineWidth = element.linewidth
         lines.append(box)
     else:
-        lines.append(convert_position(get_position(element.bbox), True, BorderType.Top))
-        lines.append(convert_position(get_position(element.bbox), True, BorderType.Bottom))
-        lines.append(convert_position(get_position(element.bbox), False, BorderType.Left))
-        lines.append(convert_position(get_position(element.bbox), False, BorderType.Right))
+        lines.append(convert_position(element, True, BorderType.Top))
+        lines.append(convert_position(element, True, BorderType.Bottom))
+        lines.append(convert_position(element, False, BorderType.Left))
+        lines.append(convert_position(element, False, BorderType.Right))
     return lines
