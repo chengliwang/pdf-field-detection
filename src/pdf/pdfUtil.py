@@ -52,3 +52,40 @@ def find_lines(element):
         lines.append(convert_position(element, False, BorderType.Left))
         lines.append(convert_position(element, False, BorderType.Right))
     return lines
+
+def merge_lines(lines):
+    # merge horizontal lines
+    ypos = set()
+    for line in [x for x in lines if x.IsHorizontal]:
+        ypos.add(line.Position.Bottom)
+    for yposition in ypos:
+        xlines = sorted([x for x in [x for x in lines if x.IsHorizontal] if abs(x.Position.Bottom - yposition) < _lineDelta], key=lambda x: x.Position.Left)
+        i = 0
+        while i < len(xlines):
+            line = xlines[i]
+            overlap = [x for x in xlines if xlines.index(x) > i and x.Position.Left - line.Position.Right < _lineDelta]
+            if len(overlap) > 0:
+                line.Position.Right = max(line.Position.Right, max(x.Position.Right for x in overlap))
+                for x in overlap:
+                    xlines.remove(x)
+                    lines.remove(x)
+                continue
+            i += 1
+
+    # merge vertical lines
+    xpos = set()
+    for line in [x for x in lines if not x.IsHorizontal]:
+        xpos.add(line.Position.Right)
+    for xposition in xpos:
+        ylines = sorted([x for x in [x for x in lines if not x.IsHorizontal] if abs(x.Position.Right - xposition) < _lineDelta], key=lambda x: x.Position.Top, reverse=True)
+        i = 0
+        while i < len(ylines):
+            line = ylines[i]
+            overlap = [x for x in ylines if ylines.index(x) > i and x.Position.Top >= line.Position.Bottom - _lineDelta]
+            if len(overlap) > 0:
+                line.Position.Bottom = min(line.Position.Bottom, min(x.Position.Bottom for x in overlap))
+                for x in overlap:
+                    ylines.remove(x)
+                    lines.remove(x)
+                continue
+            i += 1

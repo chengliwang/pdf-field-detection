@@ -9,7 +9,7 @@
             "type": "python",
             "request": "launch",
             "program": "${file}",
-            "args": [ "c:\\PDF\\Temp\\fss4.pdf", "--debug" ],
+            "args": [ "c:\\PDF\\Temp\\E_BCS12.pdf", "--debug" ],
             "console": "integratedTerminal"
         }
     ]

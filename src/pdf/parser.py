@@ -5,7 +5,7 @@ from reportlab.lib.colors import black, red, green, blue
 from pdfminer.high_level import extract_pages
 from pdfminer.layout import LAParams, LTLine, LTRect, LTTextContainer
 from models.TextLine import TextLine
-from pdfUtil import find_lines, get_position, get_acro_key
+from pdfUtil import find_lines, get_position, get_acro_key, merge_lines
 
 parser = argparse.ArgumentParser()
 parser.add_argument("PDF_File")
@@ -40,6 +40,9 @@ for page_layout in extract_pages(pdf_file = pdfFile, laparams = LAParams(line_ma
             lines.extend(find_lines(element))
         if isinstance(element, LTLine):
             lines.extend(find_lines(element))
+
+    # process lines
+    merge_lines(lines)
 
     # dump debugging info
     if debug:    
