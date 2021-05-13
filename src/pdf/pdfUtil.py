@@ -4,6 +4,11 @@ from models.Box import Box
 from models.BorderType import BorderType
 
 _lineDelta = 1.75
+_combLineWidthDelta = 6.5
+_maxCombLineWidth = 20
+_centLinePercentage = 0.3
+_maxCentLineWidth = 35
+_maxFieldWidth = 110
 
 def get_acro_key(annotation):
     keys = []
@@ -89,3 +94,53 @@ def merge_lines(lines):
                     lines.remove(x)
                 continue
             i += 1
+
+def split_lines(lines):
+    # split horizontal lines
+    for line in sorted([x for x in lines if x.IsHorizontal], key=lambda x: x.Position.Bottom, reverse=True):
+
+        # find intersecting vertical lines
+        vInterLines = sorted([x for x in [x for x in lines if not x.IsHorizontal] \
+            if x.Position.Top > line.Position.Top + _lineDelta and \
+               x.Position.Bottom <= line.Position.Bottom + _lineDelta and \
+               x.Position.Left > line.Position.Left + _lineDelta and \
+               x.Position.Right < line.Position.Right - _lineDelta \
+            ], key=lambda x: x.Position.Left) 
+
+        # remove comb and cent lines          
+        if len(vInterLines) > 0:
+            x1 = line.Position.Left
+            i = 0
+            while i < len(vInterLines):
+                x2 = vInterLines[i].Position.Left
+                x3 = line.Position.Right
+                if i + 1 < len(vInterLines):
+                    x3 = vInterLines[i + 1].Position.Left
+                width1 = x2 - x1
+                width2 = x3 - x2
+                isComboLine = abs(width1 - width2) < _combLineWidthDelta and width1 <= _maxCombLineWidth and width1 <= _maxCombLineWidth
+                isCentLine = not isComboLine and width2 < _maxCentLineWidth and width2 / (width1 + width2) <= _centLinePercentage and \
+                    width1 + width2 < _maxFieldWidth
+                x1 = x2
+                if isCentLine or isComboLine:
+                    vInterLines.pop(i)                                     
+                    continue
+                i += 1  
+
+        # split lines          
+        if len(vInterLines) > 0:
+            x1 = line.Position.Left
+            i = 0
+            while i < len(vInterLines):
+                x2 = vInterLines[i].Position.Left
+                box = Box(Position(x1, x2, line.Position.Top, line.Position.Bottom))
+                box.IsHorizontal = True
+                box.LineWidth = line.LineWidth
+                lines.append(box)
+                x1 = x2
+                i += 1
+            box = Box(Position(x1, line.Position.Right, line.Position.Top, line.Position.Bottom))
+            box.IsHorizontal = True
+            box.LineWidth = line.LineWidth
+            lines.append(box)
+            lines.remove(line)

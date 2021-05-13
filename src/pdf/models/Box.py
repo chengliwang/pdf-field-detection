@@ -13,8 +13,6 @@ class Box:
         self.Suffix = None
         self.SuffixGap = 0
         self.HasCentLine = False
-        self.CentPositionOffset = 0
         self.HasComboLine = False
-        self.Combo = 0
         self.FieldCode = None
         self.IsMarkupField = False
