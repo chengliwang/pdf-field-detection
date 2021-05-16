@@ -5,7 +5,7 @@ from reportlab.lib.colors import black, red, green, blue
 from pdfminer.high_level import extract_pages
 from pdfminer.layout import LAParams, LTLine, LTRect, LTTextContainer
 from models.TextLine import TextLine
-from pdfUtil import find_lines, get_position, get_acro_key, merge_lines, split_lines
+from pdfUtil import find_lines, get_position, get_acro_key, merge_lines, split_lines, extract_line_features
 
 parser = argparse.ArgumentParser()
 parser.add_argument("PDF_File")
@@ -44,6 +44,7 @@ for page_layout in extract_pages(pdf_file = pdfFile, laparams = LAParams(line_ma
     # process lines
     merge_lines(lines)
     split_lines(lines)
+    extract_line_features(lines, textLines, pageHeight)
 
     # dump debugging info
     if debug:    
@@ -71,11 +72,16 @@ for page_layout in extract_pages(pdf_file = pdfFile, laparams = LAParams(line_ma
         
         # dump lines
         ci = 0
+        i = 1
         for line in lines:
             canvas.setStrokeColor(colors[ci])
             ci = (ci + 1) % len(colors)
             canvas.setLineWidth(line.LineWidth)
             canvas.rect(line.Position.Left, line.Position.Bottom, line.Position.Right - line.Position.Left, line.Position.Top - line.Position.Bottom)
+            # dump fields
+            if (line.IsHorizontal):
+                form.textfield(value="line_" + str(i), x=line.FieldPosition.Left, y=line.FieldPosition.Bottom, width=line.FieldPosition.Right - line.FieldPosition.Left, height=line.FieldPosition.Top - line.FieldPosition.Bottom, borderWidth=0, fontSize=7)
+                i += 1
         canvas.showPage()
 
 if debug:        

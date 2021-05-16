@@ -2,13 +2,17 @@ from functools import reduce
 from models.Position import Position
 from models.Box import Box
 from models.BorderType import BorderType
+from models.ElementType import ElementType
+import re
 
 _lineDelta = 1.75
+_fieldHeight = 12.5
 _combLineWidthDelta = 6.5
 _maxCombLineWidth = 20
 _centLinePercentage = 0.3
 _maxCentLineWidth = 35
 _maxFieldWidth = 110
+_textToIgnore = "00|SP|-|,|IC0001|NP|RC|RZ|AMJ"
 
 def get_acro_key(annotation):
     keys = []
@@ -144,3 +148,91 @@ def split_lines(lines):
             box.LineWidth = line.LineWidth
             lines.append(box)
             lines.remove(line)
+
+def find_text(left, right, top, bottom, textLines):
+    return [x for x in textLines if left <= x.Position.Right and right >= x.Position.Left and top >= x.Position.Bottom and bottom <= x.Position.Top]
+
+def ignoreText(text):
+    strippedText = text.replace(" ", "").replace("\"", "")
+    return re.match("^" + _textToIgnore + "$", strippedText) != None
+
+def extract_line_features(lines, textLines, pageHeight):
+    for line in sorted([x for x in lines if x.IsHorizontal], key=lambda x: x.Position.Bottom, reverse=True):
+        
+        # find intersecting vertical lines
+        vInterLines = sorted([x for x in [x for x in lines if not x.IsHorizontal] \
+            if x.Position.Top > line.Position.Top + _lineDelta and \
+               x.Position.Bottom <= line.Position.Bottom + _lineDelta and \
+               x.Position.Left >= line.Position.Left - _lineDelta and \
+               x.Position.Right <= line.Position.Right + _lineDelta \
+            ], key=lambda x: x.Position.Left)
+
+        # find left and right borders
+        borders = []
+        if len(vInterLines) > 0:
+            if abs(vInterLines[0].Position.Left - line.Position.Left) <= _lineDelta:
+                borders.append(vInterLines[0])
+            if abs(vInterLines[len(vInterLines) - 1].Position.Right - line.Position.Right) <= _lineDelta:
+                borders.append(vInterLines[len(vInterLines) - 1])
+        for border in borders:
+            vInterLines.remove(border)
+        
+        # find lines above
+        linesAbove = [x for x in lines if x.IsHorizontal and x.Position.Bottom > line.Position.Top and \
+            (x.Position.Left >= line.Position.Left - _lineDelta and x.Position.Left < line.Position.Right or
+             x.Position.Right <= line.Position.Right + _lineDelta and x.Position.Right > line.Position.Left or
+             x.Position.Left < line.Position.Left + _lineDelta and x.Position.Right > line.Position.Right - _lineDelta)]
+        top = pageHeight
+        if len(linesAbove) > 0:
+            top = min(x.Position.Bottom for x in linesAbove)        
+
+        # find comb and cent lines
+        if len(vInterLines) > 0:
+            line.HasComboLine = len(vInterLines) > 1
+            if (len(vInterLines) == 1):
+                width1 = vInterLines[0].Position.Left - line.Position.Left
+                width2 = line.Position.Right - vInterLines[0].Position.Right
+                line.HasCentLine = width2 < _maxCentLineWidth and width2 / (width1 + width2) <= _centLinePercentage and width1 + width2 < _maxFieldWidth
+
+        # find top boundary
+        line.FieldPosition = Position(line.Position.Left, line.Position.Right, line.Position.Top, line.Position.Bottom)
+        if len(borders) > 0:
+            top = max(x.Position.Top for x in borders)
+            line.TopElement = ElementType.Border            
+            if len(linesAbove) > 0:
+                lineAbove = min(x.Position.Bottom for x in linesAbove)
+                top = min(lineAbove, top)
+                if lineAbove <= top:
+                    line.TopElement = ElementType.Line
+        elif len(linesAbove) > 0:
+            top = min(x.Position.Bottom for x in linesAbove)
+            line.TopElement = ElementType.Line
+        elif len(vInterLines) > 0:
+            top = max(x.Position.Bottom for x in vInterLines)
+            line.TopElement = ElementType.CombOrCent
+        line.FieldPosition.Top = top
+
+        # find texts above
+        textsAbove = find_text(line.Position.Left, line.Position.Right, top, line.Position.Bottom, textLines)
+        if len(textsAbove) > 0:
+            lastLine = [x for x in textsAbove if abs(x.Position.Bottom - min(x.Position.Bottom for x in textsAbove)) <= _lineDelta]
+            lastLineText = ""
+            for x in lastLine:
+                lastLineText += x.Text
+            if not ignoreText(lastLineText):
+                leftText = [x for x in textsAbove if x.Position.Bottom <= line.Position.Bottom + _fieldHeight and \
+                    x.Position.Right - line.Position.Left < 10]
+                if len(leftText) > 0:
+                    line.LeftPadding = max(x.Position.Right for x in leftText) - line.Position.Left
+                    line.FieldPosition.Left = line.Position.Left + line.LeftPadding
+                rightText = [x for x in textsAbove if x.Position.Bottom <= line.Position.Bottom + _fieldHeight and \
+                    line.Position.Right - x.Position.Left < 10]
+                if len(rightText) > 0:
+                    line.RightPadding = line.Position.Right - min(x.Position.Left for x in rightText)
+                    line.FieldPosition.Right = line.Position.Right - line.RightPadding
+                remainingText = list(set(textsAbove)-set(leftText)-set(rightText))
+                if len(remainingText) > 0:
+                    line.TopElement = ElementType.Text
+                    line.FieldPosition.Top = max(line.Position.Top, min(x.Position.Bottom for x in remainingText))
+
+        
