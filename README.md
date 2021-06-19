@@ -85,7 +85,7 @@ docker run -p 80:80 <docker image name>
 1. extract feature data from PDF files
 
    ```bash
-   python pdf\extract.py -t PDF_FOLDER
+   python pdf/extract.py -t PDF_FOLDER
    ```
    
 1. copy the training.csv file in the PDF_FOLDER to ml_model
