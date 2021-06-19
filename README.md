@@ -18,7 +18,7 @@ docker run -p 80:80 <docker image name>
 1. Upload a PDF file to the service  
 
    URL: /v1/predict   
-   Method: POST
+   Method: POST   
    Params:
 
    ```bash
@@ -39,7 +39,7 @@ docker run -p 80:80 <docker image name>
 1. Check the task status   
 
    URL: /v1/status/<task_id>   
-   Method: GET
+   Method: GET   
    Response: return the task status
    
    ```bash
@@ -67,10 +67,10 @@ docker run -p 80:80 <docker image name>
    
 1. Create and activate the environment 
 
-  ```bash
-  conda create --name env pip
-  conda activate env
-  ```
+   ```bash
+   conda create --name env pip
+   conda activate env
+   ```
 
 1. Install Python packages
 
