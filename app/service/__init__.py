@@ -17,5 +17,3 @@ def create_app():
     app.register_blueprint(status.bp)
 
     return app
-
-
