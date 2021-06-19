@@ -74,9 +74,9 @@ docker run -p 80:80 <docker image name>
 
 1. Install Python packages
 
-  ```bash
-  pip install -r requirements.txt
-  ```
+   ```bash
+   pip install -r requirements.txt
+   ```
 
 ### Generate the data and train the model
 
