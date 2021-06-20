@@ -1,6 +1,6 @@
 FROM python:3.9.5-slim
 USER root
-RUN apt-get -y update && apt-get -y upgrade && apt-get install -y procps vim redis-server coreutils make curl
+RUN apt-get -y update && apt-get -y upgrade && apt-get install -y procps vim redis-server coreutils make curl authbind
 COPY app app
 COPY requirements.txt .
 ADD ml_model/ml_model.tar.gz /app
