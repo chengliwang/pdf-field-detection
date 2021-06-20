@@ -59,6 +59,18 @@ docker run -p 80:80 <docker image name>
    Content-Disposition: inline; filename="sample.pdf"  
    ```
 
+## Unit testing
+
+run all tests in the tests folder 
+
+```bash
+export PYTHONPATH=/app
+cd tests
+coverage run -m pytest -s
+coverage report -i
+```
+
+
 ## How to build the model
 
 ### Setting up local environment
