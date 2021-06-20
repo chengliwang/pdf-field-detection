@@ -1,0 +1,19 @@
+apiVersion : apps/v1
+kind: Deployment
+metadata:
+  name: "pdffielddetectionsvc-2023"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: "pdffielddetectionsvc-2023"
+  template:
+    metadata:
+      labels:
+        app: "pdffielddetectionsvc-2023"
+    spec:
+      containers:
+        - name: "pdffielddetectionsvc-2023"
+          image: "pdfmlsvc.azurecr.io/pdffielddetectionsvc"
+          ports:
+          - containerPort: 80
