@@ -2,15 +2,16 @@
 
 Using Machine Learning to auto detect relevant fields in PDF documents.
 
-## How to run the service locally
+## Prebuilt Docker Images
 
-Make sure you have `docker` installed.
+index.docker.io/chengliwang/pdf-field-detection-svc:1.2
 
-Run the following commands from the project's folder:
+## Live Testing Endpoints
 
 ```bash
-docker build -t <docker image name> .
-docker run -p 80:80 <docker image name>
+http://pdf-field-detection-svc.eastus2.azurecontainer.io/v1/predict
+
+http://pdf-field-detection-svc.eastus2.azurecontainer.io/v1/status
 ```
 
 ## Usage
@@ -58,6 +59,25 @@ docker run -p 80:80 <docker image name>
    Content-Type: application/pdf  
    Content-Disposition: inline; filename="sample.pdf"  
    ```
+
+## How to run the service locally
+
+Make sure you have `docker` installed.
+
+Run the following commands from the project's folder:
+
+```bash
+docker build -t <docker image name> .
+docker run -p 80:80 <docker image name>
+```
+
+API Endpoints:   
+
+```bash
+http://localhost/v1/predict
+
+http://localhost/v1/status
+```
 
 ## Unit testing
 
