@@ -338,7 +338,7 @@ def markup_pdf(markup_data, input_pdf, output_pdf):
             if float(row['IsMarkupField']) > 0.5:
                 count += 1
                 width = float(row['FieldWidth'])
-                height = min(float(row['FieldHeight']), _maxFieldHeight)
+                height = float(row['FieldHeight'])
                 form.textfield(name='field' + str(count), x=float(row['FieldLeft']), y=float(row['FieldBottom']), relative=True, \
                     width=width, height=height, borderWidth=0, fontName='Helvetica', fontSize=9, fillColor=transparent)
         pdf_canvas.showPage()        

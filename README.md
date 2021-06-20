@@ -82,7 +82,7 @@ docker run -p 80:80 <docker image name>
 
 1. set PYTHONPATH to app folder
 
-1. extract feature data from PDF files
+1. extract feature data from PDF files. here is a [sample PDF file](app/tests/data/train.pdf) for training. markup field name should start with the 'field' prefix.
 
    ```bash
    python pdf/extract.py -t PDF_FOLDER
