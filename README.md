@@ -2,13 +2,13 @@
 
 Using Machine Learning to auto detect relevant fields in PDF documents.
 
-## Prebuilt Docker Images
-
-index.docker.io/chengliwang/pdf-field-detection-svc:1.3
-
 ## Live Demo
 
 https://chengliwang.github.io/pdf-field-detection-ui
+
+## Prebuilt Docker Images
+
+index.docker.io/chengliwang/pdf-field-detection-svc:1.3
 
 ## Live Testing Endpoints
 
