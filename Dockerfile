@@ -11,10 +11,10 @@ COPY app/server.sh /app/server.sh
 RUN chmod +x /app/server.sh
 RUN useradd -ms /bin/bash appuser
 RUN chown appuser:appuser /app -R
-RUN touch /etc/authbind/byport/80
-RUN chmod 500 /etc/authbind/byport/80
-RUN chown appuser:appuser /etc/authbind/byport/80
+RUN touch /etc/authbind/byport/443
+RUN chmod 500 /etc/authbind/byport/443
+RUN chown appuser:appuser /etc/authbind/byport/443
 USER appuser
 WORKDIR app
-EXPOSE 80
+EXPOSE 443
 CMD ["/bin/bash", "/app/server.sh"]
